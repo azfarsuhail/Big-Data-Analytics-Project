@@ -1,0 +1,39 @@
+
+docker ps --format "table {{.Names}}\t{{.Status}}\t{{.Ports}}"
+
+docker exec -it namenode hdfs dfs -ls -R /user/hive/data/
+
+docker exec -it hive-server beeline -u jdbc:hive2://hive-server:10000 -n root
+
+SHOW TABLES;
+
+DESCRIBE order_items;
+
+SELECT * FROM customers LIMIT 5;
+
+-- Step A: Set optimizations (Crucial for a smooth demo)
+SET mapreduce.framework.name=local;
+SET hive.exec.mode.local.auto=true;
+
+-- Step B: Run the State-wise Revenue Join
+SELECT 
+    c.customer_state, 
+    ROUND(SUM(i.price), 2) as total_revenue,
+    COUNT(DISTINCT o.order_id) as total_orders
+FROM customers c
+JOIN orders o ON c.customer_id = o.customer_id
+JOIN order_items i ON o.order_id = i.order_id
+GROUP BY c.customer_state
+ORDER BY total_revenue DESC;
+
+
+-- Find the top 5 most expensive product categories sold
+SELECT 
+    product_id, 
+    ROUND(AVG(price), 2) as avg_price, 
+    COUNT(*) as sales_volume
+FROM order_items 
+GROUP BY product_id 
+HAVING sales_volume > 10
+ORDER BY avg_price DESC 
+LIMIT 5;
