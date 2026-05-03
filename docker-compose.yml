@@ -15,13 +15,23 @@ services:
     env_file:
       - ./hadoop.env
 
-  datanode:
+  datanode1:
     image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
-    container_name: datanode
+    container_name: datanode1
     depends_on:
       - namenode
     volumes:
-      - hadoop_datanode:/hadoop/dfs/data
+      - hadoop_datanode1:/hadoop/dfs/data
+    env_file:
+      - ./hadoop.env
+
+  datanode2:
+    image: bde2020/hadoop-datanode:2.0.0-hadoop3.2.1-java8
+    container_name: datanode2
+    depends_on:
+      - namenode
+    volumes:
+      - hadoop_datanode2:/hadoop/dfs/data
     env_file:
       - ./hadoop.env
 
@@ -30,7 +40,8 @@ services:
     container_name: hive-server
     depends_on:
       - namenode
-      - datanode
+      - datanode1
+      - datanode2
       - hive-metastore
     env_file:
       - ./hadoop.env
@@ -49,7 +60,8 @@ services:
     container_name: hive-metastore
     depends_on:
       - namenode
-      - datanode
+      - datanode1
+      - datanode2
       - hive-metastore-postgresql
     env_file:
       - ./hadoop.env
@@ -69,4 +81,5 @@ services:
 
 volumes:
   hadoop_namenode:
-  hadoop_datanode:
+  hadoop_datanode1:
+  hadoop_datanode2:
